@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#141414] text-white overflow-x-hidden;
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer utilities {
+  .netflix-gradient {
+    background: linear-gradient(to top, rgba(20, 20, 20, 1) 0, rgba(20, 20, 20, 0) 100%);
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
