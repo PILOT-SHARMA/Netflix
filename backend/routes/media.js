@@ -43,7 +43,7 @@ router.post('/upload', auth, uploadFields, async (req, res) => {
     
     // Build the video/image URL from the saved file
     let fileUrl = '';
-    const baseUrl = 'http://localhost:5001';
+    const baseUrl = 'https://netflix-xovf.onrender.com';
     
     if (req.files && req.files['file'] && req.files['file'][0]) {
       const videoFile = req.files['file'][0];

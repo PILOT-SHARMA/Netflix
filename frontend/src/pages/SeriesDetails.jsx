@@ -11,7 +11,7 @@ const SeriesDetails = () => {
   useEffect(() => {
     const fetchSeries = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/content/series/${id}`);
+        const res = await axios.get(`https://netflix-xovf.onrender.com/api/content/series/${id}`);
         setSeries(res.data);
         if (res.data.seasons && res.data.seasons.length > 0) {
           setSelectedSeason(res.data.seasons[0]);

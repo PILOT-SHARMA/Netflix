@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/auth/me');
+      const res = await axios.get('https://netflix-xovf.onrender.com/api/auth/me');
       setUser(res.data);
     } catch (err) {
       console.error(err);
@@ -28,14 +28,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });
+    const res = await axios.post('https://netflix-xovf.onrender.com/api/auth/login', { email, password });
     localStorage.setItem('token', res.data.token);
     setToken(res.data.token);
     setUser(res.data.user);
   };
 
   const register = async (email, password) => {
-    const res = await axios.post('http://localhost:5001/api/auth/register', { email, password });
+    const res = await axios.post('https://netflix-xovf.onrender.com/api/auth/register', { email, password });
     localStorage.setItem('token', res.data.token);
     setToken(res.data.token);
     setUser(res.data.user);

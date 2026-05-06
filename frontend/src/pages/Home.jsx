@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchSeries = async () => {
       try {
-        const res = await axios.get('http://localhost:5001/api/content/series');
+        const res = await axios.get('https://netflix-xovf.onrender.com/api/content/series');
         setSeries(res.data);
         if (res.data.length > 0) {
           setFeatured(res.data[0]); // Pick the first one as featured

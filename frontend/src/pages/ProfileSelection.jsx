@@ -28,13 +28,13 @@ const ProfileSelection = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       if (editingProfile._id) { // Existing profile
-        const res = await axios.put(`http://localhost:5001/api/profiles/${editingProfile._id}`, {
+        const res = await axios.put(`https://netflix-xovf.onrender.com/api/profiles/${editingProfile._id}`, {
           name: newProfileName,
           avatar: newProfileAvatar
         }, config);
         setUser({ ...user, profiles: res.data });
       } else { // New profile
-        const res = await axios.post('http://localhost:5001/api/profiles', {
+        const res = await axios.post('https://netflix-xovf.onrender.com/api/profiles', {
           name: newProfileName,
           avatar: newProfileAvatar || 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png'
         }, config);
@@ -50,7 +50,7 @@ const ProfileSelection = () => {
     try {
       if (editingProfile._id) {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await axios.delete(`http://localhost:5001/api/profiles/${editingProfile._id}`, config);
+        const res = await axios.delete(`https://netflix-xovf.onrender.com/api/profiles/${editingProfile._id}`, config);
         setUser({ ...user, profiles: res.data });
       }
       setEditingProfile(null);

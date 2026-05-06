@@ -24,7 +24,7 @@ const Upload = () => {
 
   const fetchSeries = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/content/series');
+      const res = await axios.get('https://netflix-xovf.onrender.com/api/content/series');
       setAllSeries(res.data);
     } catch (err) {
       console.error(err);
@@ -33,7 +33,7 @@ const Upload = () => {
 
   const fetchSeasonsForSeries = async (seriesId) => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/content/series/${seriesId}`);
+      const res = await axios.get(`https://netflix-xovf.onrender.com/api/content/series/${seriesId}`);
       if (res.data.seasons) {
         setSeasonsForSeries(res.data.seasons);
       }
@@ -53,7 +53,7 @@ const Upload = () => {
     if (seriesForm.thumbnail) formData.append('thumbnail', seriesForm.thumbnail);
 
     try {
-      await axios.post('http://localhost:5001/api/content/series', formData, {
+      await axios.post('https://netflix-xovf.onrender.com/api/content/series', formData, {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
       });
       alert('Series Created Successfully!');
@@ -71,7 +71,7 @@ const Upload = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/content/seasons', seasonForm, {
+      await axios.post('https://netflix-xovf.onrender.com/api/content/seasons', seasonForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Season Added Successfully!');
@@ -100,7 +100,7 @@ const Upload = () => {
     if (episodeForm.thumbnail) formData.append('thumbnail', episodeForm.thumbnail);
 
     try {
-      await axios.post('http://localhost:5001/api/content/episodes', formData, {
+      await axios.post('https://netflix-xovf.onrender.com/api/content/episodes', formData, {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
       });
       alert('Episode Added Successfully!');

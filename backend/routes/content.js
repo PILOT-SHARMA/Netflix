@@ -40,7 +40,7 @@ router.post('/series', auth, upload.fields([{ name: 'bannerImage' }, { name: 'th
   try {
     const { title, description, categories } = req.body;
     let bannerImage = '', thumbnail = '';
-    const baseUrl = 'http://localhost:5001/uploads/images/';
+    const baseUrl = 'https://netflix-xovf.onrender.com/uploads/images/';
 
     if (req.files['bannerImage']) bannerImage = baseUrl + req.files['bannerImage'][0].filename;
     if (req.files['thumbnail']) thumbnail = baseUrl + req.files['thumbnail'][0].filename;
@@ -93,8 +93,8 @@ router.post('/episodes', auth, upload.fields([{ name: 'video' }, { name: 'thumbn
     const { seasonId, episodeNumber, title, description, duration } = req.body;
     let videoUrl = '', thumbnail = '';
     
-    if (req.files['video']) videoUrl = 'http://localhost:5001/uploads/videos/' + req.files['video'][0].filename;
-    if (req.files['thumbnail']) thumbnail = 'http://localhost:5001/uploads/images/' + req.files['thumbnail'][0].filename;
+    if (req.files['video']) videoUrl = 'https://netflix-xovf.onrender.com/uploads/videos/' + req.files['video'][0].filename;
+    if (req.files['thumbnail']) thumbnail = 'https://netflix-xovf.onrender.com/uploads/images/' + req.files['thumbnail'][0].filename;
 
     const episode = new Episode({ seasonId, episodeNumber, title, description, duration, videoUrl, thumbnail });
     await episode.save();

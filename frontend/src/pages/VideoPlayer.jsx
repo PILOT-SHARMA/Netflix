@@ -23,7 +23,7 @@ const VideoPlayer = () => {
   useEffect(() => {
     const fetchEpisode = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/content/episodes/${id}`);
+        const res = await axios.get(`https://netflix-xovf.onrender.com/api/content/episodes/${id}`);
         setEpisode(res.data);
       } catch (err) {
         console.error(err);
