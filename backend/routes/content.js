@@ -1,30 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const auth = require('../middleware/auth');
 const Series = require('../models/Series');
 const Season = require('../models/Season');
 const Episode = require('../models/Episode');
+const cloudinary = require('../config/cloudinary');
 
-const uploadDir = path.join(__dirname, '..', 'uploads');
-const videosDir = path.join(uploadDir, 'videos');
-const imagesDir = path.join(uploadDir, 'images');
-if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
-if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+// Use memory storage — files go to buffer, then we upload to Cloudinary
+const upload = multer({ storage: multer.memoryStorage() });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (file.mimetype.startsWith('video/')) cb(null, videosDir);
-    else cb(null, imagesDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage });
+// Helper: upload a buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer, options = {}) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 // ---- SERIES ----
 router.get('/series', async (req, res) => {
@@ -40,10 +35,21 @@ router.post('/series', auth, upload.fields([{ name: 'bannerImage' }, { name: 'th
   try {
     const { title, description, categories } = req.body;
     let bannerImage = '', thumbnail = '';
-    const baseUrl = 'https://netflix-xovf.onrender.com/uploads/images/';
 
-    if (req.files['bannerImage']) bannerImage = baseUrl + req.files['bannerImage'][0].filename;
-    if (req.files['thumbnail']) thumbnail = baseUrl + req.files['thumbnail'][0].filename;
+    if (req.files['bannerImage']) {
+      const result = await uploadToCloudinary(req.files['bannerImage'][0].buffer, {
+        folder: 'netflix/images',
+        resource_type: 'image',
+      });
+      bannerImage = result.secure_url;
+    }
+    if (req.files['thumbnail']) {
+      const result = await uploadToCloudinary(req.files['thumbnail'][0].buffer, {
+        folder: 'netflix/images',
+        resource_type: 'image',
+      });
+      thumbnail = result.secure_url;
+    }
 
     const categoryArray = categories ? categories.split(',').map(c => c.trim()) : [];
 
@@ -51,6 +57,7 @@ router.post('/series', auth, upload.fields([{ name: 'bannerImage' }, { name: 'th
     await series.save();
     res.json(series);
   } catch (err) {
+    console.error(err);
     res.status(500).send('Server Error');
   }
 });
@@ -93,13 +100,26 @@ router.post('/episodes', auth, upload.fields([{ name: 'video' }, { name: 'thumbn
     const { seasonId, episodeNumber, title, description, duration } = req.body;
     let videoUrl = '', thumbnail = '';
     
-    if (req.files['video']) videoUrl = 'https://netflix-xovf.onrender.com/uploads/videos/' + req.files['video'][0].filename;
-    if (req.files['thumbnail']) thumbnail = 'https://netflix-xovf.onrender.com/uploads/images/' + req.files['thumbnail'][0].filename;
+    if (req.files['video']) {
+      const result = await uploadToCloudinary(req.files['video'][0].buffer, {
+        folder: 'netflix/videos',
+        resource_type: 'video',
+      });
+      videoUrl = result.secure_url;
+    }
+    if (req.files['thumbnail']) {
+      const result = await uploadToCloudinary(req.files['thumbnail'][0].buffer, {
+        folder: 'netflix/images',
+        resource_type: 'image',
+      });
+      thumbnail = result.secure_url;
+    }
 
     const episode = new Episode({ seasonId, episodeNumber, title, description, duration, videoUrl, thumbnail });
     await episode.save();
     res.json(episode);
   } catch (err) {
+    console.error(err);
     res.status(500).send('Server Error');
   }
 });

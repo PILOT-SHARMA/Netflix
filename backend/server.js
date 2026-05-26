@@ -17,6 +17,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/profiles', require('./routes/profiles'));
 app.use('/api/content', require('./routes/content'));
+app.use('/api/media', require('./routes/media'));
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 // Connect to MongoDB

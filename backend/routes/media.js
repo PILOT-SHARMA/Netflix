@@ -1,35 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const auth = require('../middleware/auth');
 const Media = require('../models/Media');
+const cloudinary = require('../config/cloudinary');
 
-// Ensure upload directories exist
-const videosDir = path.join(__dirname, '..', 'uploads', 'videos');
-const thumbnailsDir = path.join(__dirname, '..', 'uploads', 'thumbnails');
-if (!fs.existsSync(videosDir)) fs.mkdirSync(videosDir, { recursive: true });
-if (!fs.existsSync(thumbnailsDir)) fs.mkdirSync(thumbnailsDir, { recursive: true });
+// Use memory storage — files go to buffer, then we upload to Cloudinary
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Configure multer for local disk storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (file.fieldname === 'file') {
-      cb(null, videosDir);
-    } else if (file.fieldname === 'thumbnail') {
-      cb(null, thumbnailsDir);
-    } else {
-      cb(null, videosDir);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage });
+// Helper: upload a buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer, options = {}) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 // Accept both video file and thumbnail image
 const uploadFields = upload.fields([
@@ -41,20 +29,25 @@ router.post('/upload', auth, uploadFields, async (req, res) => {
   try {
     const { title, description, type, category } = req.body;
     
-    // Build the video/image URL from the saved file
+    // Upload file to Cloudinary
     let fileUrl = '';
-    const baseUrl = 'https://netflix-xovf.onrender.com';
-    
     if (req.files && req.files['file'] && req.files['file'][0]) {
-      const videoFile = req.files['file'][0];
-      fileUrl = `${baseUrl}/uploads/videos/${videoFile.filename}`;
+      const resourceType = type === 'video' ? 'video' : 'image';
+      const result = await uploadToCloudinary(req.files['file'][0].buffer, {
+        folder: `netflix/${resourceType}s`,
+        resource_type: resourceType,
+      });
+      fileUrl = result.secure_url;
     }
 
-    // Build the thumbnail URL
+    // Upload thumbnail to Cloudinary
     let thumbnailUrl = '';
     if (req.files && req.files['thumbnail'] && req.files['thumbnail'][0]) {
-      const thumbFile = req.files['thumbnail'][0];
-      thumbnailUrl = `${baseUrl}/uploads/thumbnails/${thumbFile.filename}`;
+      const result = await uploadToCloudinary(req.files['thumbnail'][0].buffer, {
+        folder: 'netflix/images',
+        resource_type: 'image',
+      });
+      thumbnailUrl = result.secure_url;
     }
 
     if (!fileUrl) {
